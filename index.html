@@ -3,41 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>wossol | تسجيل الدخول</title>
-  <style>
-    body { background-color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; margin: 0; }
-    .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-    button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; background: #0ea5e9; color: white; border: none; border-radius: 10px; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>wossol</h1>
-    <p>اضغط للدخول</p>
-    <button onclick="login()">الدخول باستخدام Google</button>
-  </div>
-
+  <title>اختبار الدخول</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
+  <button onclick="login()" style="padding:20px; font-size:20px;">اضغط هنا للاختبار</button>
+
   <script>
+    alert("1. الكود يعمل والصفحة تحملت بنجاح!");
+
     const supabase = window.supabase.createClient(
       'https://jnczjcxyossckdcpnuuw.supabase.co', 
       'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
     );
 
     async function login() {
+      alert("2. الزر يعمل!");
       try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: 'https://khiroaissaoui2-gif.github.io/WOSSOL.DZ/dashboard.html'
           }
         });
-        
         if (error) {
-          alert('خطأ من سوبابيس: ' + error.message);
+          alert("3. خطأ من سوبابيس: " + error.message);
+        } else {
+          alert("4. جاري التحويل إلى جوجل...");
         }
-      } catch (err) {
-        alert('خطأ تقني: ' + err.message);
+      } catch (e) {
+        alert("خطأ غير متوقع: " + e.message);
       }
     }
   </script>
