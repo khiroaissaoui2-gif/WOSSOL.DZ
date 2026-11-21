@@ -3,15 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>اختبار التحديث</title>
+  <title>wossol | تسجيل الدخول</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Tajawal', sans-serif; margin: 0; }
+    .card { background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 350px; }
+    h1 { color: #0ea5e9; margin-bottom: 20px; }
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: 'Tajawal', sans-serif;}
+    button { width: 100%; padding: 15px; border: none; border-radius: 12px; background: #0ea5e9; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+    .btn-outline { background: transparent; border: 2px solid #0ea5e9; color: #0ea5e9; }
+    #statusBox { display: none; margin-top: 15px; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; word-wrap: break-word; text-align: right;}
+  </style>
 </head>
-<body style="background-color: purple; text-align:center; padding-top:50px; font-family:sans-serif;">
-  
-  <h1 style="color: white;">إذا رأيت هذه الشاشة البنفسجية، فأنت ترى الملف الجديد.</h1>
-  
-  <button onclick="document.body.style.backgroundColor='orange'; this.innerText='✅ نجح التفاعل!';" style="padding:20px; font-size:20px; margin-top:20px; cursor:pointer;">
-    اضغط هنا لتغيير اللون
-  </button>
+<body>
+  <div class="card">
+    <h1>wossol</h1>
+    <input type="email" id="email" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" placeholder="كلمة المرور">
+    
+    <button onclick="doLogin()">تسجيل الدخول</button>
+    <button onclick="doSignup()" class="btn-outline">إنشاء حساب جديد</button>
+    
+    <!-- هنا ستظهر النتيجة -->
+    <div id="statusBox"></div>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // إعداد سوبابيس
+    const supabase = window.supabase.createClient(
+      'https://jnczjcxyossccdcpnuuw.supabase.co', 
+      'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+    );
+
+    function showStatus(text, type) {
+      const box = document.getElementById('statusBox');
+      box.style.display = 'block';
+      box.innerText = text;
+      if (type === 'error') {
+        box.style.backgroundColor = '#fef2f2';
+        box.style.color = '#ef4444';
+        box.style.border = '1px solid #fecaca';
+      } else if (type === 'success') {
+        box.style.backgroundColor = '#f0fdf4';
+        box.style.color = '#10b981';
+        box.style.border = '1px solid #bbf7d0';
+      } else {
+        box.style.backgroundColor = '#e0f2fe';
+        box.style.color = '#0284c7';
+        box.style.border = '1px solid #bae6fd';
+      }
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password) {
+        showStatus('يرجى إدخال البريد وكلمة المرور', 'error');
+        return;
+      }
+
+      showStatus('جاري الاتصال بقاعدة البيانات...', 'info');
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+          showStatus('فشل الدخول: ' + error.message, 'error');
+        } else {
+          showStatus('تم الدخول بنجاح! جاري التحويل...', 'success');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        }
+      } catch (err) {
+        showStatus('خطأ في الشبكة: ' + err.message, 'error');
+      }
+    }
+
+    async function doSignup() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password) {
+        showStatus('يرجى إدخال البريد وكلمة المرور', 'error');
+        return;
+      }
+
+      showStatus('جاري إنشاء حساب جديد...', 'info');
+
+      try {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        
+        if (error) {
+          showStatus('فشل الإنشاء: ' + error.message, 'error');
+        } else if (data.user && data.session === null) {
+          showStatus('تم إنشاء الحساب، لكن يجب تأكيد البريد الإلكتروني (هذا يعني أن إعدادات سوبابيس لم تطفئ التأكيد).', 'error');
+        } else {
+          showStatus('تم إنشاء الحساب بنجاح! جاري التحويل...', 'success');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        }
+      } catch (err) {
+        showStatus('خطأ في الشبكة: ' + err.message, 'error');
+      }
+    }
+  </script>
 </body>
 </html>
