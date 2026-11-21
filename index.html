@@ -3,70 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>اختبار سوبابيس</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>wossol | تسجيل الدخول</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    body { padding: 20px; font-family: sans-serif; background: #f8fafc; }
-    #log { border: 1px solid #ccc; padding: 15px; min-height: 150px; background: white; white-space: pre-wrap; font-family: monospace; direction: ltr; text-align: left; font-size: 14px; margin-bottom: 20px; border-radius: 10px; }
-    button { padding: 15px; font-size: 18px; background: #0ea5e9; color: white; border: none; border-radius: 10px; width: 100%; font-weight: bold; }
+    body { background-color: #f8fafc; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Tajawal', sans-serif; margin: 0; }
+    .card { background: white; padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 350px; width: 100%; }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; } h1 span { color: #0ea5e9; }
+    p { color: #64748b; margin-bottom: 30px; }
+    button { width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    button:hover { background: #f1f5f9; }
+    img { width: 24px; }
   </style>
 </head>
 <body>
-  <h2 style="text-align: center;">سجل الأحداث (Log)</h2>
-  <div id="log"></div>
-  
-  <button onclick="runTest()">اضغط هنا للاختبار</button>
+  <div class="card">
+    <h1>wossol<span>.</span></h1>
+    <p>منصة التوصيل السريع والآمن</p>
+    <button onclick="login()">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+      الدخول باستخدام Google
+    </button>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const logDiv = document.getElementById('log');
-    function log(msg) {
-      logDiv.innerHTML += `> ${msg}<br>`;
-    }
+    const supabase = window.supabase.createClient(
+      'https://jnczjcxyossccdcpnuuw.supabase.co', 
+      'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+    );
 
-    log("1. تم تحميل الصفحة.");
-
-    if (typeof window.supabase === 'undefined') {
-      log("❌ خطأ: مكتبة Supabase لم يتم تحميلها! قد يكون مزود الإنترنت يحجب الرابط.");
-    } else {
-      log("✅ مكتبة Supabase تم تحميلها بنجاح.");
-      try {
-        const supabase = window.supabase.createClient(
-          'https://jnczjcxyossckdcpnuuw.supabase.co',
-          'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
-        );
-        log("✅ تم الاتصال بسوبابيس بنجاح.");
-        window.supabaseClient = supabase; 
-      } catch (e) {
-        log("❌ خطأ أثناء الاتصال بسوبابيس: " + e.message);
-      }
-    }
-
-    async function runTest() {
-      logDiv.innerHTML = ""; // مسح السجل القديم
-      log("⏳ جاري محاولة الدخول بجوجل...");
-      
-      if (!window.supabaseClient) {
-        log("❌ لا يمكن الدخول، سوبابيس غير جاهز.");
-        return;
-      }
-      
-      try {
-        const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: 'https://khiroaissaoui2-gif.github.io/WOSSOL.DZ/dashboard.html'
-          }
-        });
-        
-        if (error) {
-          log("❌ خطأ من سوبابيس: " + error.message);
-        } else {
-          log("✅ تم توليد رابط جوجل بنجاح!");
-          log("⏳ جاري تحويلك إلى جوجل... إذا توقفت الشاشة هنا، فالمتصفح يمنع التحويل التلقائي.");
+    async function login() {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://khiroaissaoui2-gif.github.io/WOSSOL.DZ/dashboard.html'
         }
-      } catch (err) {
-        log("❌ خطأ فادح: " + err.message);
-      }
+      });
+      if (error) alert('حدث خطأ: ' + error.message);
     }
   </script>
 </body>
