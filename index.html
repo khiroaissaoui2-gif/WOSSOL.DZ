@@ -2,37 +2,119 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>wossol | تسجيل الدخول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>wossol | المنصة</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Tajawal', sans-serif; margin: 0; }
-    .card { background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 350px; }
-    h1 { color: #0ea5e9; margin-bottom: 5px; font-size: 2.5rem; }
-    p { color: #64748b; margin-bottom: 25px; font-size: 0.9rem; }
-    input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: 'Tajawal', sans-serif; font-size: 1rem; background: #f8fafc;}
-    input:focus { outline: none; border-color: #0ea5e9; background: white; }
-    button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-family: 'Tajawal', sans-serif; transition: 0.2s;}
-    .btn-primary { background: #0ea5e9; color: white; }
-    .btn-primary:hover { background: #0284c7; }
-    .btn-outline { background: transparent; border: 2px solid #0ea5e9; color: #0ea5e9; }
-    #statusBox { display: none; margin-top: 15px; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; text-align: right; }
+    :root { --primary: #0ea5e9; --primary-dark: #0284c7; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --success: #10b981; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* تنسيق الأقسام المخفية */
+    .section { display: none; flex-direction: column; min-height: 100vh; justify-content: center; align-items: center; padding: 20px; }
+    .section.active { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* البطاقات والنماذج */
+    .card { background: var(--card); padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; }
+    .logo { font-size: 2.5rem; font-weight: 800; margin-bottom: 5px; }
+    .logo span { color: var(--primary); }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    
+    input, select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; font-family: inherit; background: var(--bg); transition: 0.2s; }
+    input:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; }
+    
+    button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.2s; margin-bottom: 10px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-danger { background: var(--danger); color: white; }
+    
+    #authMsg, #setupMsg { font-size: 0.9rem; font-weight: 700; margin-top: 10px; display: none; padding: 10px; border-radius: 8px; }
+
+    /* لوحة التحكم */
+    .dashboard-container { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 50px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--card); border-bottom: 1px solid var(--border); width: 100%; border-radius: 0 0 20px 20px; margin-bottom: 20px;}
+    .user-info { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
+    .welcome-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 25px; border-radius: 20px; text-align: right; margin-bottom: 20px; }
+    .welcome-card h2 { font-size: 1.4rem; margin-bottom: 5px; }
+    .role-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; }
+    .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .stat-card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
+    .stat-card h3 { font-size: 1.8rem; color: var(--primary); }
+    .stat-card p { color: var(--muted); font-size: 0.9rem; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>wossol<span>.</span></h1>
-    <p>منصة التوصيل السريع والآمن</p>
-    
-    <input type="email" id="email" placeholder="البريد الإلكتروني">
-    <input type="password" id="password" placeholder="كلمة المرور">
-    
-    <button onclick="doLogin()" class="btn-primary">تسجيل الدخول</button>
-    <button onclick="doSignup()" class="btn-outline">إنشاء حساب جديد</button>
-    
-    <div id="statusBox"></div>
+
+  <!-- 1. شاشة تسجيل الدخول -->
+  <div id="authSection" class="section">
+    <div class="card">
+      <div class="logo">wossol<span>.</span></div>
+      <p class="subtitle">منصة التوصيل السريع والآمن</p>
+      
+      <input type="email" id="authEmail" placeholder="البريد الإلكتروني">
+      <input type="password" id="authPassword" placeholder="كلمة المرور">
+      
+      <button id="btnLogin" class="btn-primary">تسجيل الدخول</button>
+      <button id="btnSignup" class="btn-outline">إنشاء حساب جديد</button>
+      
+      <div id="authMsg"></div>
+    </div>
   </div>
 
+  <!-- 2. شاشة إكمال البيانات (لأول مرة) -->
+  <div id="setupSection" class="section">
+    <div class="card">
+      <div class="logo">wossol<span>.</span></div>
+      <h2 style="margin-bottom: 10px;">أهلاً بك! 👋</h2>
+      <p class="subtitle">يرجى إكمال بياناتك للبدء</p>
+      
+      <input type="tel" id="setupPhone" placeholder="رقم الهاتف (06xxxxxxxx)">
+      <select id="setupRole">
+        <option value="buyer">مشتري (أطلب منتجات)</option>
+        <option value="courier">عامل توصيل (أوصل الطلبات)</option>
+        <option value="seller">بائع / متجر (أعرض منتجات)</option>
+      </select>
+      
+      <button id="btnSaveProfile" class="btn-primary">حفظ والبدء</button>
+      <div id="setupMsg"></div>
+    </div>
+  </div>
+
+  <!-- 3. لوحة التحكم الرئيسية -->
+  <div id="dashboardSection" class="section" style="justify-content: flex-start; padding: 0;">
+    <div class="top-bar">
+      <div class="logo" style="font-size: 1.5rem;">wossol<span>.</span></div>
+      <div class="user-info">
+        <span id="dashName">...</span>
+        <div class="avatar" id="dashAvatar">U</div>
+        <button id="btnLogout" class="btn-danger" style="width: auto; padding: 8px 15px; margin: 0; font-size: 0.8rem;">خروج</button>
+      </div>
+    </div>
+    
+    <div class="dashboard-container">
+      <div class="welcome-card">
+        <h2>مرحباً، <span id="dashFirstName">...</span></h2>
+        <p>جاري تجهيز لوحة التحكم الخاصة بك.</p>
+        <span class="role-badge" id="dashRole">جاري التحميل...</span>
+      </div>
+
+      <div class="grid-stats">
+        <div class="stat-card">
+          <h3>0</h3>
+          <p>طلباتي النشطة</p>
+        </div>
+        <div class="stat-card">
+          <h3>0.0</h3>
+          <p>تقييمي</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- مكتبة Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const supabase = window.supabase.createClient(
@@ -40,44 +122,129 @@
       'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
     );
 
-    function showStatus(text, type) {
-      const box = document.getElementById('statusBox');
-      box.style.display = 'block';
-      box.innerText = text;
-      if (type === 'error') { box.style.backgroundColor = '#fef2f2'; box.style.color = '#ef4444'; }
-      else if (type === 'success') { box.style.backgroundColor = '#f0fdf4'; box.style.color = '#10b981'; }
-      else { box.style.backgroundColor = '#e0f2fe'; box.style.color = '#0284c7'; }
+    let currentUser = null;
+
+    // دالة إظهار الأقسام
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
     }
 
-    async function doLogin() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      if (!email || !password) return showStatus('يرجى إدخال البريد وكلمة المرور', 'error');
+    // دالة عرض الرسائل
+    function showMsg(elementId, text, type) {
+      const el = document.getElementById(elementId);
+      el.style.display = 'block';
+      el.innerText = text;
+      if(type === 'error') { el.style.background = '#fef2f2'; el.style.color = '#ef4444'; }
+      else { el.style.background = '#f0fdf4'; el.style.color = '#10b981'; }
+    }
+
+    // دالة الترجمة للأدوار
+    function getRoleName(role) {
+      if(role === 'buyer') return 'مشتري';
+      if(role === 'courier') return 'عامل توصيل';
+      if(role === 'seller') return 'بائع';
+      return role;
+    }
+
+    // التحقق من الحالة عند فتح الموقع
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        showSection('authSection');
+        return;
+      }
       
-      showStatus('جاري تسجيل الدخول...', 'info');
+      currentUser = session.user;
+      await checkProfile();
+    }
+
+    // التحقق من وجود الملف الشخصي
+    async function checkProfile() {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (!profile || !profile.phone) {
+        showSection('setupSection');
+      } else {
+        // عرض لوحة التحكم
+        showSection('dashboardSection');
+        const name = profile.full_name || currentUser.email;
+        document.getElementById('dashName').innerText = name;
+        document.getElementById('dashFirstName').innerText = name.split(' ')[0];
+        document.getElementById('dashAvatar').innerText = name.charAt(0).toUpperCase();
+        document.getElementById('dashRole').innerText = 'دورك: ' + getRoleName(profile.role);
+      }
+    }
+
+    // --- أحداث الأزرار ---
+
+    // 1. تسجيل الدخول
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if(!email || !password) return showMsg('authMsg', 'يرجى إدخال البريد وكلمة المرور', 'error');
+      
+      showMsg('authMsg', 'جاري تسجيل الدخول...', 'success');
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) showStatus('خطأ: ' + error.message, 'error');
+      if(error) showMsg('authMsg', 'خطأ: ' + error.message, 'error');
       else {
-        showStatus('تم الدخول بنجاح! جاري التحويل...', 'success');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        currentUser = data.user;
+        await checkProfile();
       }
-    }
+    });
 
-    async function doSignup() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      if (!email || !password) return showStatus('يرجى إدخال البريد وكلمة المرور', 'error');
+    // 2. إنشاء حساب
+    document.getElementById('btnSignup').addEventListener('click', async () => {
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      if(!email || !password) return showMsg('authMsg', 'يرجى إدخال البريد وكلمة المرور', 'error');
       
-      showStatus('جاري إنشاء الحساب...', 'info');
+      showMsg('authMsg', 'جاري إنشاء الحساب...', 'success');
       const { data, error } = await supabase.auth.signUp({ email, password });
       
-      if (error) showStatus('خطأ: ' + error.message, 'error');
+      if(error) showMsg('authMsg', 'خطأ: ' + error.message, 'error');
       else {
-        showStatus('تم إنشاء الحساب بنجاح! جاري التحويل...', 'success');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        currentUser = data.user;
+        await checkProfile();
       }
-    }
+    });
+
+    // 3. حفظ الملف الشخصي (رقم الهاتف والدور)
+    document.getElementById('btnSaveProfile').addEventListener('click', async () => {
+      const phone = document.getElementById('setupPhone').value.trim();
+      const role = document.getElementById('setupRole').value;
+      if(!phone) return showMsg('setupMsg', 'يرجى إدخال رقم الهاتف', 'error');
+      
+      showMsg('setupMsg', 'جاري الحفظ...', 'success');
+      
+      const { error } = await supabase.from('profiles').upsert({
+        id: currentUser.id,
+        full_name: currentUser.email.split('@')[0], // نستخدم بداية البريد كاسم مؤقت
+        phone: phone,
+        role: role
+      });
+
+      if(error) showMsg('setupMsg', 'خطأ: ' + error.message, 'error');
+      else {
+        await checkProfile(); // إعادة التوجيه للوحة التحكم
+      }
+    });
+
+    // 4. تسجيل الخروج
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      currentUser = null;
+      showSection('authSection');
+    });
+
+    // تشغيل المنصة عند التحميل
+    document.addEventListener("DOMContentLoaded", init);
+
   </script>
 </body>
 </html>
