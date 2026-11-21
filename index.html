@@ -29,7 +29,6 @@
     /* الأزرار */
     button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.2s; margin-bottom: 10px; }
     .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { opacity: 0.9; }
     .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
     .btn-danger { background: var(--danger); color: white; padding: 8px 15px; width: auto; margin: 0; font-size: 0.8rem; }
     
@@ -47,17 +46,18 @@
 </head>
 <body>
 
-  <!-- الشريط العلوي (يظهر بعد الدخول) -->
+  <!-- صندوق الأخطاء التشخيصي -->
+  <div id="debugBox" style="color: red; text-align: center; font-weight: bold; padding: 5px;"></div>
+
   <div id="topBar" class="top-bar hidden">
     <div class="logo">wossol<span>.</span></div>
     <div class="user-info">
       <span id="userNameDisplay">...</span>
-      <button onclick="logout()" class="btn-danger">خروج</button>
+      <button id="btnLogout" class="btn-danger">خروج</button>
     </div>
   </div>
 
   <div class="container">
-    <!-- رسالة التنبيه العامة -->
     <div id="globalMsg" class="alert"></div>
 
     <!-- 1. شاشة الدخول -->
@@ -65,12 +65,10 @@
       <div class="card" style="text-align: center;">
         <h1 style="color: var(--primary); margin-bottom: 5px;">wossol</h1>
         <p style="color: var(--muted); margin-bottom: 20px;">منصة التوصيل السريع والآمن</p>
-        
         <input type="email" id="authEmail" placeholder="البريد الإلكتروني">
         <input type="password" id="authPassword" placeholder="كلمة المرور">
-        
-        <button onclick="login()" class="btn-primary">تسجيل الدخول</button>
-        <button onclick="signup()" class="btn-outline">إنشاء حساب جديد</button>
+        <button id="btnLogin" class="btn-primary">تسجيل الدخول</button>
+        <button id="btnSignup" class="btn-outline">إنشاء حساب جديد</button>
       </div>
     </div>
 
@@ -80,40 +78,42 @@
         <h2 style="margin-bottom: 15px;">أكمل بياناتك</h2>
         <input type="tel" id="setupPhone" placeholder="رقم الهاتف (06...)">
         <select id="setupRole">
-          <option value="buyer">أنا مشتري (أطلب منتجات)</option>
-          <option value="courier">أنا موصل (أوصل الطلبات)</option>
+          <option value="buyer">أنا مشتري</option>
+          <option value="courier">أنا موصل</option>
         </select>
-        <button onclick="saveProfile()" class="btn-primary">حفظ والمتابعة</button>
+        <button id="btnSave" class="btn-primary">حفظ والمتابعة</button>
       </div>
     </div>
 
     <!-- 3. لوحة التحكم -->
     <div id="screenDashboard" class="hidden">
-      
-      <!-- واجهة المشتري -->
       <div id="buyerUI" class="hidden">
         <div class="card">
           <h3 style="margin-bottom: 15px;">اطلب شيئاً الآن</h3>
-          <input type="text" id="orderItems" placeholder="ماذا تريد أن نشتري لك؟ (مثال: خبز وحليب)">
+          <input type="text" id="orderItems" placeholder="ماذا تريد أن تشتري؟">
           <input type="number" id="orderCost" placeholder="سعر المشتريات (د.ج)" value="1000">
           <input type="number" id="orderFee" placeholder="عمولة التوصيل (د.ج)" value="200">
-          <button onclick="createOrder()" class="btn-primary">إرسال الطلب</button>
+          <button id="btnCreateOrder" class="btn-primary">إرسال الطلب</button>
         </div>
         <h3 style="margin-bottom: 15px;">طلباتي السابقة:</h3>
         <div id="buyerOrdersList"></div>
       </div>
 
-      <!-- واجهة الموصل -->
       <div id="courierUI" class="hidden">
-        <h3 style="margin-bottom: 15px;">الطلبات المتاحة الآن:</h3>
+        <h3 style="margin-bottom: 15px;">الطلبات المتاحة:</h3>
         <div id="courierOrdersList"></div>
       </div>
-
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // التقاط أي خطأ وعرضه على الشاشة
+    window.onerror = function(msg) {
+      document.getElementById('debugBox').innerText = "خطأ في الكود: " + msg;
+      return false;
+    };
+
     const supabase = window.supabase.createClient(
       'https://jnczjcxyossccdcpnuuw.supabase.co', 
       'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
@@ -122,22 +122,19 @@
     let currentUser = null;
     let userProfile = null;
 
-    // دالة عرض الرسائل
     function showMsg(text, isError = true) {
       const msgDiv = document.getElementById('globalMsg');
       msgDiv.innerText = text;
       msgDiv.className = isError ? 'alert alert-error' : 'alert alert-success';
-      setTimeout(() => { msgDiv.className = 'alert'; }, 5000); // تختفي بعد 5 ثواني
+      setTimeout(() => { msgDiv.className = 'alert'; }, 5000);
     }
 
-    // إخفاء كل الشاشات
     function hideScreens() {
       document.getElementById('screenAuth').classList.add('hidden');
       document.getElementById('screenSetup').classList.add('hidden');
       document.getElementById('screenDashboard').classList.add('hidden');
     }
 
-    // التحقق من الحالة عند بدء التشغيل
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -149,9 +146,8 @@
       }
     }
 
-    // 1. إنشاء حساب
-    async function signup() {
-      const email = document.getElementById('authEmail').value;
+    async function doSignup() {
+      const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
       if(!email || !password) return showMsg('أدخل البريد وكلمة المرور');
 
@@ -164,9 +160,8 @@
       await checkUserProfile();
     }
 
-    // 2. تسجيل الدخول
-    async function login() {
-      const email = document.getElementById('authEmail').value;
+    async function doLogin() {
+      const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
       if(!email || !password) return showMsg('أدخل البريد وكلمة المرور');
 
@@ -179,12 +174,9 @@
       await checkUserProfile();
     }
 
-    // 3. التحقق من الملف الشخصي
     async function checkUserProfile() {
-      // جلب الملف الشخصي
       const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
 
-      // إذا لم يوجد ملف، أو لا يوجد رقم هاتف (أي أنه لم يكمل البيانات)
       if (error || !data || !data.phone) {
         hideScreens();
         document.getElementById('screenSetup').classList.remove('hidden');
@@ -196,8 +188,7 @@
       }
     }
 
-    // 4. حفظ الملف الشخصي
-    async function saveProfile() {
+    async function doSaveProfile() {
       const phone = document.getElementById('setupPhone').value;
       const role = document.getElementById('setupRole').value;
       if(!phone) return showMsg('أدخل رقم الهاتف');
@@ -218,7 +209,6 @@
       await checkUserProfile();
     }
 
-    // 5. فتح لوحة التحكم المناسبة للدور
     function loadDashboard() {
       hideScreens();
       document.getElementById('screenDashboard').classList.remove('hidden');
@@ -234,10 +224,7 @@
       }
     }
 
-    // --- وظائف المشتري ---
-
-    // إنشاء طلب جديد
-    async function createOrder() {
+    async function doCreateOrder() {
       const items = document.getElementById('orderItems').value;
       const cost = parseFloat(document.getElementById('orderCost').value) || 0;
       const fee = parseFloat(document.getElementById('orderFee').value) || 0;
@@ -259,7 +246,6 @@
       fetchBuyerOrders();
     }
 
-    // جلب طلبات المشتري
     async function fetchBuyerOrders() {
       const list = document.getElementById('buyerOrdersList');
       list.innerHTML = '<p style="color:var(--muted);">جاري التحميل...</p>';
@@ -277,14 +263,11 @@
             <h4>${order.items}</h4>
             <p>السعر: ${order.cost} د.ج | التوصيل: ${order.fee} د.ج</p>
           </div>
-          <span class="badge">${order.status === 'open' ? 'مفتوح' : (order.status === 'accepted' ? 'قيد التوصيل' : 'تم')}</span>
+          <span class="badge">${order.status === 'open' ? 'مفتوح' : 'مقبول'}</span>
         </div>
       `).join('');
     }
 
-    // --- وظائف الموصل ---
-
-    // جلب الطلبات المتاحة للموصل
     async function fetchCourierOrders() {
       const list = document.getElementById('courierOrdersList');
       list.innerHTML = '<p style="color:var(--muted);">جاري البحث عن طلبات...</p>';
@@ -300,14 +283,13 @@
         <div class="order-card">
           <div class="order-info">
             <h4>${order.items}</h4>
-            <p>العمولة: ${order.fee} د.ج | السعر: ${order.cost} د.ج</p>
+            <p>العمولة: ${order.fee} د.ج</p>
           </div>
-          <button onclick="acceptOrder(${order.id})" class="btn-primary" style="width:auto; padding: 8px 15px; margin:0;">قبول</button>
+          <button class="btn-primary" style="width:auto; padding: 8px 15px; margin:0;" onclick="acceptOrder(${order.id})">قبول</button>
         </div>
       `).join('');
     }
 
-    // قبول الطلب
     async function acceptOrder(orderId) {
       showMsg('جاري قبول الطلب...', false);
       const { error } = await supabase.from('orders').update({
@@ -321,15 +303,24 @@
       fetchCourierOrders();
     }
 
-    // 6. تسجيل الخروج
-    async function logout() {
+    async function doLogout() {
       await supabase.auth.signOut();
-      window.location.reload(); // إعادة تحميل الصفحة لتصفير كل شيء
+      window.location.reload();
     }
 
-    // تشغيل المنصة
-    document.addEventListener('DOMContentLoaded', init);
+    // --- ربط الأزرار بالكود (الطريقة المضمونة) ---
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnLogin').addEventListener('click', doLogin);
+      document.getElementById('btnSignup').addEventListener('click', doSignup);
+      document.getElementById('btnSave').addEventListener('click', doSaveProfile);
+      document.getElementById('btnCreateOrder').addEventListener('click', doCreateOrder);
+      document.getElementById('btnLogout').addEventListener('click', doLogout);
+      
+      init();
+    });
 
+    // جعل دالة القبول متاحة للنطاق العام لأنها تستخدم في HTML
+    window.acceptOrder = acceptOrder;
   </script>
 </body>
-  </html>
+</html>
