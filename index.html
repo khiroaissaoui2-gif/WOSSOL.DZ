@@ -2,11 +2,49 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>اختبار بسيط</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اختبار سوبابيس</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="text-align:center; padding-top:50px;">
-  <button onclick="alert('مبروك! الأكواد تعمل على متصفحك.')" style="padding:20px; font-size:20px;">
-    اضغط هنا
+<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
+  
+  <button onclick="login()" style="padding:20px; font-size:20px; background:#0ea5e9; color:white; border:none; border-radius:10px;">
+    اختبار الدخول بجوجل
   </button>
+
+  <script>
+    alert("1. المتصفح جاهز.");
+
+    if (window.supabase) {
+      alert("2. مكتبة سوبابيس تم تحميلها بنجاح.");
+    } else {
+      alert("خطأ: مكتبة سوبابيس لم يتم تحميلها! قد يكون هناك حجب من مزود الإنترنت.");
+    }
+
+    const supabase = window.supabase.createClient(
+      'https://jnczjcxyossckdcpnuuw.supabase.co',
+      'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+    );
+
+    async function login() {
+      alert("3. بدأ الاتصال بجوجل...");
+      try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: 'https://khiroaissaoui2-gif.github.io/WOSSOL.DZ/dashboard.html'
+          }
+        });
+        
+        if (error) {
+          alert("4. خطأ من سوبابيس: " + error.message);
+        } else {
+          alert("4. تم توليد رابط جوجل! جاري تحويلك... إذا لم يحدث شيء، فقد يكون المتصفح حظر النافذة المنبثقة.");
+        }
+      } catch (err) {
+        alert("4. خطأ تقني: " + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
