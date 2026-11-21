@@ -3,38 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>اختبار سوبابيس</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>اختبار تسجيل الدخول</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Tajawal', sans-serif; margin: 0; }
+    .card { background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 350px; }
+    h1 { color: #0ea5e9; margin-bottom: 20px; }
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: 'Tajawal', sans-serif;}
+    button { width: 100%; padding: 15px; border: none; border-radius: 12px; background: #0ea5e9; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+    .btn-outline { background: transparent; border: 2px solid #0ea5e9; color: #0ea5e9; }
+    #message { margin-top: 15px; font-weight: bold; font-size: 0.95rem; word-wrap: break-word; }
+  </style>
 </head>
-<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
-  <h1>اختبار مكتبة Supabase</h1>
-  <div id="result" style="font-size:20px; font-weight:bold; color: red;">
-    جاري الفحص...
+<body>
+  <div class="card">
+    <h1>wossol</h1>
+    <input type="email" id="email" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" placeholder="كلمة المرور">
+    
+    <button onclick="signUp()" id="signUpBtn">إنشاء حساب جديد</button>
+    <button onclick="signIn()" id="signInBtn" class="btn-outline">تسجيل الدخول</button>
+    
+    <div id="message"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    setTimeout(function() {
-      const resultDiv = document.getElementById('result');
+    const supabase = window.supabase.createClient(
+      'https://jnczjcxyossckdcpnuuw.supabase.co', 
+      'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+    );
+
+    const msgDiv = document.getElementById('message');
+
+    function showMsg(text, isError = true) {
+      msgDiv.innerText = text;
+      msgDiv.style.color = isError ? '#ef4444' : '#10b981';
+    }
+
+    async function signUp() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
       
-      if (typeof window.supabase === 'undefined') {
-        resultDiv.innerHTML = '❌ فشل تحميل مكتبة Supabase!<br>قد يكون مزود الإنترنت يحجب الرابط.';
-        resultDiv.style.color = 'red';
-      } else {
-        resultDiv.innerHTML = '✅ مكتبة Supabase تم تحميلها بنجاح!';
-        resultDiv.style.color = 'green';
+      if(!email || !password) return showMsg("يرجى إدخال البريد وكلمة المرور");
+      
+      showMsg("جاري إنشاء الحساب...", false);
+      
+      try {
+        const { data, error } = await supabase.auth.signUp({ email, password });
         
-        try {
-          const client = window.supabase.createClient(
-            'https://jnczjcxyossckdcpnuuw.supabase.co', 
-            'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
-          );
-          resultDiv.innerHTML += '<br>✅ تم الاتصال بقاعدة البيانات بنجاح!';
-        } catch (e) {
-          resultDiv.innerHTML += '<br>❌ خطأ في الاتصال: ' + e.message;
-          resultDiv.style.color = 'red';
+        if (error) {
+          showMsg("خطأ في إنشاء الحساب: " + error.message);
+        } else if (data.user && data.session === null) {
+          showMsg("تم إنشاء الحساب، ولكن إعدادات (تأكيد البريد) مفعلة في سوبابيس وتمنع الدخول.");
+        } else {
+          showMsg("تم إنشاء الحساب بنجاح! جاري التحويل...", false);
+          setTimeout(() => window.location.href = 'dashboard.html', 1500);
         }
+      } catch (err) {
+        showMsg("خطأ تقني: " + err.message);
       }
-    }, 1500); // ننتظر 1.5 ثانية لتحميل المكتبة
+    }
+
+    async function signIn() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if(!email || !password) return showMsg("يرجى إدخال البريد وكلمة المرور");
+      
+      showMsg("جاري تسجيل الدخول...", false);
+      
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+          showMsg("خطأ في الدخول: " + error.message);
+        } else {
+          showMsg("تم الدخول بنجاح! جاري التحويل...", false);
+          setTimeout(() => window.location.href = 'dashboard.html', 1500);
+        }
+      } catch (err) {
+        showMsg("خطأ تقني: " + err.message);
+      }
+    }
   </script>
 </body>
 </html>
