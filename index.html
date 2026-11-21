@@ -3,61 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تشخيص النظام</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>wossol | تسجيل الدخول</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Tajawal', sans-serif; margin: 0; }
+    .card { background: white; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 350px; }
+    h1 { color: #0ea5e9; margin-bottom: 5px; font-size: 2.5rem; }
+    p { color: #64748b; margin-bottom: 25px; font-size: 0.9rem; }
+    input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: 'Tajawal', sans-serif; font-size: 1rem; background: #f8fafc;}
+    input:focus { outline: none; border-color: #0ea5e9; background: white; }
+    button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-family: 'Tajawal', sans-serif; transition: 0.2s;}
+    .btn-primary { background: #0ea5e9; color: white; }
+    .btn-primary:hover { background: #0284c7; }
+    .btn-outline { background: transparent; border: 2px solid #0ea5e9; color: #0ea5e9; }
+    #statusBox { display: none; margin-top: 15px; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 0.9rem; text-align: right; }
+  </style>
 </head>
-<body style="padding: 20px; font-family: sans-serif; background: #fffbeb;">
-  <h2>تشخيص الأخطاء (Diagnostics)</h2>
-  <div id="log" style="background: white; border: 1px solid #ccc; padding: 15px; border-radius: 10px; min-height: 100px; font-family: monospace; direction: ltr; text-align: left; font-size:14px;">
-    1. تم تحميل الصفحة.<br>
+<body>
+  <div class="card">
+    <h1>wossol<span>.</span></h1>
+    <p>منصة التوصيل السريع والآمن</p>
+    
+    <input type="email" id="email" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" placeholder="كلمة المرور">
+    
+    <button onclick="doLogin()" class="btn-primary">تسجيل الدخول</button>
+    <button onclick="doSignup()" class="btn-outline">إنشاء حساب جديد</button>
+    
+    <div id="statusBox"></div>
   </div>
-  <button id="testBtn" style="margin-top: 20px; padding: 15px; font-size: 18px; width: 100%; background: #0ea5e9; color: white; border: none; border-radius: 10px; cursor:pointer;">اضغط للاختبار</button>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const logDiv = document.getElementById('log');
-    function log(msg, color = 'black') {
-      logDiv.innerHTML += `<span style="color:${color};">${msg}</span><br>`;
+    const supabase = window.supabase.createClient(
+      'https://jnczjcxyossccdcpnuuw.supabase.co', 
+      'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+    );
+
+    function showStatus(text, type) {
+      const box = document.getElementById('statusBox');
+      box.style.display = 'block';
+      box.innerText = text;
+      if (type === 'error') { box.style.backgroundColor = '#fef2f2'; box.style.color = '#ef4444'; }
+      else if (type === 'success') { box.style.backgroundColor = '#f0fdf4'; box.style.color = '#10b981'; }
+      else { box.style.backgroundColor = '#e0f2fe'; box.style.color = '#0284c7'; }
     }
 
-    // التقاط أي خطأ يحدث في الصفحة
-    window.onerror = function(message, source, lineno, colno, error) {
-      log(`❌ خطأ عام: ${message} (سطر ${lineno})`, 'red');
-      return false;
-    };
-
-    log('2. بدأ تشغيل الكود (Script started).');
-
-    if (typeof window.supabase === 'undefined') {
-      log('❌ مكتبة Supabase لم يتم تحميلها (CDN failed).', 'red');
-    } else {
-      log('✅ مكتبة Supabase تم تحميلها بنجاح.', 'green');
+    async function doLogin() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) return showStatus('يرجى إدخال البريد وكلمة المرور', 'error');
       
-      try {
-        const supabase = window.supabase.createClient(
-          'https://jnczjcxyossckdcpnuuw.supabase.co', 
-          'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
-        );
-        log('✅ تم تهيئة سوبابيس بنجاح.', 'green');
-        
-        document.getElementById('testBtn').addEventListener('click', async () => {
-          log('⏳ تم الضغط على الزر. جاري محاولة إنشاء حساب وهمي...', 'blue');
-          try {
-            const { data, error } = await supabase.auth.signUp({ 
-              email: 'test_'+Date.now()+'@test.com', 
-              password: 'password123' 
-            });
-            if (error) {
-              log(`❌ خطأ من سوبابيس: ${error.message}`, 'red');
-            } else {
-              log(`✅ نجاح! تم إنشاء الحساب. هل يوجد Session: ${data.session ? 'نعم' : 'لا (تأكيد البريد مفعل)'}`, 'green');
-            }
-          } catch (err) {
-            log(`❌ خطأ في الـ Catch: ${err.message}`, 'red');
-          }
-        });
+      showStatus('جاري تسجيل الدخول...', 'info');
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) showStatus('خطأ: ' + error.message, 'error');
+      else {
+        showStatus('تم الدخول بنجاح! جاري التحويل...', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+      }
+    }
 
-      } catch (e) {
-        log('❌ خطأ أثناء تهيئة العميل: ' + e.message, 'red');
+    async function doSignup() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) return showStatus('يرجى إدخال البريد وكلمة المرور', 'error');
+      
+      showStatus('جاري إنشاء الحساب...', 'info');
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      
+      if (error) showStatus('خطأ: ' + error.message, 'error');
+      else {
+        showStatus('تم إنشاء الحساب بنجاح! جاري التحويل...', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
       }
     }
   </script>
