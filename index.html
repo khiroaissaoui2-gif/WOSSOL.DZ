@@ -5,31 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>اختبار سوبابيس</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { padding: 20px; font-family: sans-serif; background: #f8fafc; }
+    #log { border: 1px solid #ccc; padding: 15px; min-height: 150px; background: white; white-space: pre-wrap; font-family: monospace; direction: ltr; text-align: left; font-size: 14px; margin-bottom: 20px; border-radius: 10px; }
+    button { padding: 15px; font-size: 18px; background: #0ea5e9; color: white; border: none; border-radius: 10px; width: 100%; font-weight: bold; }
+  </style>
 </head>
-<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
+<body>
+  <h2 style="text-align: center;">سجل الأحداث (Log)</h2>
+  <div id="log"></div>
   
-  <button onclick="login()" style="padding:20px; font-size:20px; background:#0ea5e9; color:white; border:none; border-radius:10px;">
-    اختبار الدخول بجوجل
-  </button>
+  <button onclick="runTest()">اضغط هنا للاختبار</button>
 
   <script>
-    alert("1. المتصفح جاهز.");
-
-    if (window.supabase) {
-      alert("2. مكتبة سوبابيس تم تحميلها بنجاح.");
-    } else {
-      alert("خطأ: مكتبة سوبابيس لم يتم تحميلها! قد يكون هناك حجب من مزود الإنترنت.");
+    const logDiv = document.getElementById('log');
+    function log(msg) {
+      logDiv.innerHTML += `> ${msg}<br>`;
     }
 
-    const supabase = window.supabase.createClient(
-      'https://jnczjcxyossckdcpnuuw.supabase.co',
-      'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
-    );
+    log("1. تم تحميل الصفحة.");
 
-    async function login() {
-      alert("3. بدأ الاتصال بجوجل...");
+    if (typeof window.supabase === 'undefined') {
+      log("❌ خطأ: مكتبة Supabase لم يتم تحميلها! قد يكون مزود الإنترنت يحجب الرابط.");
+    } else {
+      log("✅ مكتبة Supabase تم تحميلها بنجاح.");
       try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const supabase = window.supabase.createClient(
+          'https://jnczjcxyossckdcpnuuw.supabase.co',
+          'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+        );
+        log("✅ تم الاتصال بسوبابيس بنجاح.");
+        window.supabaseClient = supabase; 
+      } catch (e) {
+        log("❌ خطأ أثناء الاتصال بسوبابيس: " + e.message);
+      }
+    }
+
+    async function runTest() {
+      logDiv.innerHTML = ""; // مسح السجل القديم
+      log("⏳ جاري محاولة الدخول بجوجل...");
+      
+      if (!window.supabaseClient) {
+        log("❌ لا يمكن الدخول، سوبابيس غير جاهز.");
+        return;
+      }
+      
+      try {
+        const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: 'https://khiroaissaoui2-gif.github.io/WOSSOL.DZ/dashboard.html'
@@ -37,12 +59,13 @@
         });
         
         if (error) {
-          alert("4. خطأ من سوبابيس: " + error.message);
+          log("❌ خطأ من سوبابيس: " + error.message);
         } else {
-          alert("4. تم توليد رابط جوجل! جاري تحويلك... إذا لم يحدث شيء، فقد يكون المتصفح حظر النافذة المنبثقة.");
+          log("✅ تم توليد رابط جوجل بنجاح!");
+          log("⏳ جاري تحويلك إلى جوجل... إذا توقفت الشاشة هنا، فالمتصفح يمنع التحويل التلقائي.");
         }
       } catch (err) {
-        alert("4. خطأ تقني: " + err.message);
+        log("❌ خطأ فادح: " + err.message);
       }
     }
   </script>
