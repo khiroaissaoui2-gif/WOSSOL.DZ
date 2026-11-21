@@ -3,18 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>اختبار بسيط</title>
+  <title>اختبار سوبابيس</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body style="text-align:center; padding-top:50px; font-family:sans-serif;">
-  <h1>اختبار التفاعل</h1>
-  <button id="myBtn" style="padding:20px; font-size:20px; cursor:pointer;">اضغط هنا</button>
-  <p id="result" style="color: red; font-weight:bold; font-size:20px; margin-top:20px;">الزر لم يضغط بعد</p>
+  <h1>اختبار مكتبة Supabase</h1>
+  <div id="result" style="font-size:20px; font-weight:bold; color: red;">
+    جاري الفحص...
+  </div>
 
   <script>
-    document.getElementById('myBtn').addEventListener('click', function() {
-      document.getElementById('result').innerText = '✅ ممتاز! الزر يعمل والمتصفح يتفاعل.';
-      document.getElementById('result').style.color = 'green';
-    });
+    setTimeout(function() {
+      const resultDiv = document.getElementById('result');
+      
+      if (typeof window.supabase === 'undefined') {
+        resultDiv.innerHTML = '❌ فشل تحميل مكتبة Supabase!<br>قد يكون مزود الإنترنت يحجب الرابط.';
+        resultDiv.style.color = 'red';
+      } else {
+        resultDiv.innerHTML = '✅ مكتبة Supabase تم تحميلها بنجاح!';
+        resultDiv.style.color = 'green';
+        
+        try {
+          const client = window.supabase.createClient(
+            'https://jnczjcxyossckdcpnuuw.supabase.co', 
+            'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
+          );
+          resultDiv.innerHTML += '<br>✅ تم الاتصال بقاعدة البيانات بنجاح!';
+        } catch (e) {
+          resultDiv.innerHTML += '<br>❌ خطأ في الاتصال: ' + e.message;
+          resultDiv.style.color = 'red';
+        }
+      }
+    }, 1500); // ننتظر 1.5 ثانية لتحميل المكتبة
   </script>
 </body>
 </html>
