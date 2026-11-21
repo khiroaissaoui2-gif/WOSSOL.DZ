@@ -9,37 +9,66 @@
     body { background-color: #f8fafc; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Tajawal', sans-serif; margin: 0; }
     .card { background: white; padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 350px; width: 100%; }
     h1 { font-size: 2.5rem; margin-bottom: 10px; } h1 span { color: #0ea5e9; }
-    p { color: #64748b; margin-bottom: 30px; }
-    button { width: 100%; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
-    button:hover { background: #f1f5f9; }
-    img { width: 24px; }
+    input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: 'Tajawal', sans-serif;}
+    button { width: 100%; padding: 15px; border: none; border-radius: 12px; background: #0ea5e9; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+    .toggle-btn { background: transparent; color: #64748b; font-size: 0.9rem; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>wossol<span>.</span></h1>
     <p>منصة التوصيل السريع والآمن</p>
-    <button onclick="login()">
-      <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
-      الدخول باستخدام Google
-    </button>
+    
+    <input type="email" id="email" placeholder="البريد الإلكتروني">
+    <input type="password" id="password" placeholder="كلمة المرور">
+    
+    <button onclick="login()" id="mainBtn">دخول</button>
+    <button class="toggle-btn" onclick="toggleMode()" id="toggleBtn">ليس لديك حساب؟ إنشاء حساب جديد</button>
+    <p id="msg" style="color: red; font-size: 0.9rem;"></p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const supabase = window.supabase.createClient(
-      'https://jnczjcxyossccdcpnuuw.supabase.co', 
+      'https://jnczjcxyossckdcpnuuw.supabase.co', 
       'sb_publishable_WjYd1nvzw9-Bqa6oqSBWpA_GyefxfY7'
     );
 
+    let isLogin = true;
+
+    function toggleMode() {
+      isLogin = !isLogin;
+      document.getElementById('mainBtn').innerText = isLogin ? 'دخول' : 'إنشاء حساب';
+      document.getElementById('toggleBtn').innerText = isLogin ? 'ليس لديك حساب؟ إنشاء حساب جديد' : 'لديك حساب بالفعل؟ تسجيل الدخول';
+      document.getElementById('msg').innerText = '';
+    }
+
     async function login() {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'https://khiroaissaoui2-gif.github.io/WOSSOL.DZ/dashboard.html'
-        }
-      });
-      if (error) alert('حدث خطأ: ' + error.message);
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+      
+      if (!email || !password) {
+        msg.innerText = 'يرجى إدخال البريد وكلمة المرور';
+        return;
+      }
+
+      document.getElementById('mainBtn').innerText = 'جاري المعالجة...';
+
+      let result;
+      if (isLogin) {
+        result = await supabase.auth.signInWithPassword({ email, password });
+      } else {
+        result = await supabase.auth.signUp({ email, password });
+      }
+
+      if (result.error) {
+        msg.innerText = 'خطأ: ' + result.error.message;
+        document.getElementById('mainBtn').innerText = isLogin ? 'دخول' : 'إنشاء حساب';
+      } else {
+        // نجاح! الانتقال للوحة التحكم
+        window.location.href = 'dashboard.html';
+      }
     }
   </script>
 </body>
