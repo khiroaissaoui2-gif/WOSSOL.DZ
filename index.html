@@ -12,19 +12,18 @@
     input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-family: 'Tajawal', sans-serif;}
     button { width: 100%; padding: 15px; border: none; border-radius: 12px; background: #0ea5e9; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
     .toggle-btn { background: transparent; color: #64748b; font-size: 0.9rem; }
+    #msg { color: #ef4444; font-size: 0.9rem; margin-top: 15px; font-weight: bold; min-height: 20px;}
   </style>
 </head>
 <body>
   <div class="card">
     <h1>wossol<span>.</span></h1>
-    <p>منصة التوصيل السريع والآمن</p>
-    
     <input type="email" id="email" placeholder="البريد الإلكتروني">
     <input type="password" id="password" placeholder="كلمة المرور">
     
-    <button onclick="login()" id="mainBtn">دخول</button>
+    <button onclick="doAction()" id="mainBtn">دخول</button>
     <button class="toggle-btn" onclick="toggleMode()" id="toggleBtn">ليس لديك حساب؟ إنشاء حساب جديد</button>
-    <p id="msg" style="color: red; font-size: 0.9rem;"></p>
+    <p id="msg"></p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -43,31 +42,46 @@
       document.getElementById('msg').innerText = '';
     }
 
-    async function login() {
+    async function doAction() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const msg = document.getElementById('msg');
+      const btn = document.getElementById('mainBtn');
       
       if (!email || !password) {
         msg.innerText = 'يرجى إدخال البريد وكلمة المرور';
         return;
       }
 
-      document.getElementById('mainBtn').innerText = 'جاري المعالجة...';
+      btn.innerText = 'جاري الاتصال...';
+      msg.innerText = '';
 
-      let result;
-      if (isLogin) {
-        result = await supabase.auth.signInWithPassword({ email, password });
-      } else {
-        result = await supabase.auth.signUp({ email, password });
-      }
+      try {
+        let result;
+        if (isLogin) {
+          result = await supabase.auth.signInWithPassword({ email, password });
+        } else {
+          result = await supabase.auth.signUp({ email, password });
+        }
 
-      if (result.error) {
-        msg.innerText = 'خطأ: ' + result.error.message;
-        document.getElementById('mainBtn').innerText = isLogin ? 'دخول' : 'إنشاء حساب';
-      } else {
-        // نجاح! الانتقال للوحة التحكم
-        window.location.href = 'dashboard.html';
+        if (result.error) {
+          msg.innerText = 'خطأ: ' + result.error.message;
+          btn.innerText = isLogin ? 'دخول' : 'إنشاء حساب';
+        } else if (!result.data.session) {
+          // هذا يحدث إذا كان تأكيد البريد لا يزال مفعلاً في سوبابيس
+          msg.innerText = 'تم إنشاء الحساب، لكن يجب تأكيد البريد (راجع إعدادات سوبابيس).';
+          btn.innerText = isLogin ? 'دخول' : 'إنشاء حساب';
+        } else {
+          // نجاح!
+          msg.style.color = 'green';
+          msg.innerText = 'نجاح! جاري تحويلك...';
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        }
+      } catch (err) {
+        msg.innerText = 'خطأ تقني: ' + err.message;
+        btn.innerText = isLogin ? 'دخول' : 'إنشاء حساب';
       }
     }
   </script>
